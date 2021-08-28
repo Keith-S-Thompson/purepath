@@ -8,7 +8,9 @@
 #include <unistd.h>
 
 static void usage_error(const char *program_name) {
-    fprintf(stderr, "Usage: %s [path]\n", program_name);
+    fprintf(stderr, "Usage: %s [-k] [path]\n", program_name);
+    fprintf(stderr, "    -k Keep non-directory entries\n");
+    fprintf(stderr, "With no path argument, use $PATH\n");
     exit(EXIT_FAILURE);
 }
 
@@ -24,6 +26,12 @@ static bool is_directory(const char *dirname) {
 }
 
 int main(int argc, char **argv) {
+    bool keep_all = false;
+    if (argc > 1 && strcmp(argv[1], "-k") == 0) {
+        keep_all = true;
+        argc--;
+        argv++;
+    }
     const char *path;
     switch (argc) {
         case 1:
@@ -83,7 +91,7 @@ int main(int argc, char **argv) {
     bool first = true;
     for (size_t i = 0; i < element_count; i ++) {
         if (elements[i] != NULL) {
-            if (is_directory(elements[i])) {
+            if (keep_all || is_directory(elements[i])) {
                 if (!first) {
                     putchar(':');
                 }
