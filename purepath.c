@@ -8,8 +8,9 @@
 #include <unistd.h>
 
 static void usage_error(const char *program_name) {
-    fprintf(stderr, "Usage: %s [-k] [path]\n", program_name);
+    fprintf(stderr, "Usage: %s [-k] [-c] [path]\n", program_name);
     fprintf(stderr, "    -k Keep non-directory entries\n");
+    fprintf(stderr, "    -c Remove entries starting with \"/cygdrive/\"\n");
     fprintf(stderr, "With no path argument, use $PATH\n");
     exit(EXIT_FAILURE);
 }
@@ -26,11 +27,23 @@ static bool is_directory(const char *dirname) {
 }
 
 int main(int argc, char **argv) {
+    // TODO: Use getopt
     bool keep_all = false;
-    if (argc > 1 && strcmp(argv[1], "-k") == 0) {
-        keep_all = true;
-        argc--;
-        argv++;
+    bool remove_cygdrive = false;
+    while (argc > 1) {
+        if (strcmp(argv[1], "-k") == 0) {
+            keep_all = true;
+            argc--;
+            argv++;
+        }
+        else if (strcmp(argv[1], "-c") == 0) {
+            remove_cygdrive = true;
+            argc--;
+            argv++;
+        }
+        else {
+            break;
+        }
     }
     const char *path;
     switch (argc) {
@@ -91,7 +104,16 @@ int main(int argc, char **argv) {
     bool first = true;
     for (size_t i = 0; i < element_count; i ++) {
         if (elements[i] != NULL) {
-            if (keep_all || is_directory(elements[i])) {
+            // printf(">>> elements[%zu]=%s\n", i, elements[i]);
+            bool keep = true;
+            if (! keep_all && ! is_directory(elements[i])) {
+                keep = false;
+            }
+            else if (remove_cygdrive && strstr(elements[i], "/cygdrive/") != NULL) {
+                keep = false;
+            }
+            // printf("    keep=%s\n", keep ? "true" : "false");
+            if (keep) {
                 if (!first) {
                     putchar(':');
                 }
