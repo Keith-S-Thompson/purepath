@@ -8,12 +8,11 @@
 #include <unistd.h>
 
 static void usage_error(const char *program_name) {
-    fprintf(stderr, "Usage: %s [-k] [-c] [-C] [path]\n", program_name);
+    fprintf(stderr, "Usage: %s [-k] [path]\n", program_name);
     fprintf(stderr, "    -k Keep non-directory entries\n");
-    fprintf(stderr, "    -c Remove entries starting with \"/cygdrive/\"\n");
-    fprintf(stderr, "    -C Remove entries starting with \"/cygdrive/\"\n");
-    fprintf(stderr, "       iff $DELETE_CYGDRIVE_FROM_PATH is set\n");
-    fprintf(stderr, "With no path argument, use $PATH\n");
+    fprintf(stderr, "With no path argument, use $PATH.\n");
+    fprintf(stderr, "if $DELETE_CYGDRIVE_FROM_PATH is set, entries starting with \"/cygdrive/\"\n");
+    fprintf(stderr, "are removed.\n");
     exit(EXIT_FAILURE);
 }
 
@@ -31,22 +30,10 @@ static bool is_directory(const char *dirname) {
 int main(int argc, char **argv) {
     // TODO: Use getopt
     bool keep_all = false;
-    bool remove_cygdrive = false;
+    const bool remove_cygdrive = getenv("DELETE_CYGDRIVE_FROM_PATH") != NULL;
     while (argc > 1) {
         if (strcmp(argv[1], "-k") == 0) {
             keep_all = true;
-            argc--;
-            argv++;
-        }
-        else if (strcmp(argv[1], "-c") == 0) {
-            remove_cygdrive = true;
-            argc--;
-            argv++;
-        }
-        else if (strcmp(argv[1], "-C") == 0) {
-            if (getenv("DELETE_CYGDRIVE_FROM_PATH") != NULL) {
-                remove_cygdrive = true;
-            }
             argc--;
             argv++;
         }
