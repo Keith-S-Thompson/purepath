@@ -8,9 +8,11 @@
 #include <unistd.h>
 
 static void usage_error(const char *program_name) {
-    fprintf(stderr, "Usage: %s [-k] [-c] [path]\n", program_name);
+    fprintf(stderr, "Usage: %s [-k] [-c] [-C] [path]\n", program_name);
     fprintf(stderr, "    -k Keep non-directory entries\n");
     fprintf(stderr, "    -c Remove entries starting with \"/cygdrive/\"\n");
+    fprintf(stderr, "    -C Remove entries starting with \"/cygdrive/\"\n");
+    fprintf(stderr, "       iff $DELETE_CYGDRIVE_FROM_PATH is set\n");
     fprintf(stderr, "With no path argument, use $PATH\n");
     exit(EXIT_FAILURE);
 }
@@ -38,6 +40,13 @@ int main(int argc, char **argv) {
         }
         else if (strcmp(argv[1], "-c") == 0) {
             remove_cygdrive = true;
+            argc--;
+            argv++;
+        }
+        else if (strcmp(argv[1], "-C") == 0) {
+            if (getenv("DELETE_CYGDRIVE_FROM_PATH") != NULL) {
+                remove_cygdrive = true;
+            }
             argc--;
             argv++;
         }
