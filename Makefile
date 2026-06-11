@@ -5,7 +5,7 @@ all: purepath
 purepath: purepath.c
 
 INSTALL_FILE    = install -p -m 644
-INSTALL_PROGRAM = install -p -m 755
+INSTALL_PROGRAM = install -p -m 755 -s
 
 prefix_is_defined:
 ifeq ($(strip $(PREFIX)),)
